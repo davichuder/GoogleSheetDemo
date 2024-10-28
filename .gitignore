@@ -35,3 +35,4 @@ build/
 ### Tokens ###
 credentials.json
 /tokens/
+.env
