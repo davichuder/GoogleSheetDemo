@@ -36,3 +36,4 @@ build/
 credentials.json
 /tokens/
 .env
+credentials-service.json
