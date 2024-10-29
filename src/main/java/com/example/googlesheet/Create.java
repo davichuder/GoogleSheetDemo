@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.Permission;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
@@ -13,7 +14,6 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 
 /* Class to demonstrate the use of Spreadsheet Create API */
 public class Create {
@@ -29,12 +29,10 @@ public class Create {
         /* Load pre-authorized user credentials from the environment.
            TODO(developer) - See https://developers.google.com/identity for
             guides on implementing OAuth2 for your application. */
-        // GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
-        //         .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
         GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
                 .createScoped(Arrays.asList(
                         SheetsScopes.SPREADSHEETS,
-                        "https://www.googleapis.com/auth/drive"
+                        DriveScopes.DRIVE
                 ));
         HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
                 credentials);
