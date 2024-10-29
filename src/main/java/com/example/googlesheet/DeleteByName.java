@@ -1,5 +1,8 @@
 package com.example.googlesheet;
 
+import java.io.IOException;
+import java.util.Collections;
+
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -9,9 +12,6 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
-
-import java.io.IOException;
-import java.util.Collections;
 
 public class DeleteByName {
 
@@ -42,7 +42,7 @@ public class DeleteByName {
     }
 
     public static void main(String[] args) throws IOException {
-        String spreadsheetName = "Test Spreadsheet";
+        String spreadsheetName = "Hello World";
         deleteSpreadsheetByName(spreadsheetName);
     }
 }
