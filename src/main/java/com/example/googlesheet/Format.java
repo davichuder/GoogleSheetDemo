@@ -80,7 +80,7 @@ public class Format {
         int endColumn = rangeParts[1].replaceAll("\\d", "").charAt(0) - 'A' + 1;
         int endRow = Integer.parseInt(rangeParts[1].replaceAll("[^\\d]", ""));
 
-        int sheetId = getSheetId(sheetsService, spreadsheetId, sheetName);
+        int sheetId = getSheetId(spreadsheetId, sheetName);
 
         // Apply the data validation rule to the range
         requests.add(new Request().setSetDataValidation(new SetDataValidationRequest()
@@ -96,8 +96,8 @@ public class Format {
         sheetsService.spreadsheets().batchUpdate(spreadsheetId, body).execute();
     }
 
-    public static int getSheetId(Sheets service, String spreadsheetId, String sheetName) throws IOException {
-        Spreadsheet spreadsheet = service.spreadsheets().get(spreadsheetId).execute();
+    public static int getSheetId(String spreadsheetId, String sheetName) throws IOException {
+        Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetId).execute();
         for (Sheet sheet : spreadsheet.getSheets()) {
             if (sheet.getProperties().getTitle().equals(sheetName)) {
                 return sheet.getProperties().getSheetId();
@@ -118,7 +118,7 @@ public class Format {
         int endColumn = rangeParts[1].replaceAll("\\d", "").charAt(0) - 'A' + 1;
         int endRow = Integer.parseInt(rangeParts[1].replaceAll("[^\\d]", ""));
 
-        int sheetId = getSheetId(sheetsService, spreadsheetId, sheetName);
+        int sheetId = getSheetId(spreadsheetId, sheetName);
 
         // Colores para las reglas
         Color headerColor = new Color().setRed(0.6f).setGreen(0.8f).setBlue(1.0f); // Color para la cabecera
