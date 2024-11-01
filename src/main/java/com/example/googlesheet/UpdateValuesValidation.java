@@ -1,22 +1,26 @@
 package com.example.googlesheet;
 
-import com.google.api.client.googleapis.json.GoogleJsonError;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.*;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.api.services.sheets.v4.SheetsScopes;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BooleanCondition;
+import com.google.api.services.sheets.v4.model.ConditionValue;
+import com.google.api.services.sheets.v4.model.DataValidationRule;
+import com.google.api.services.sheets.v4.model.GridRange;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.SetDataValidationRequest;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
+import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
+import com.google.api.services.sheets.v4.model.ValueRange;
+
 public class UpdateValuesValidation {
+    private static Sheets sheetsService = GoogleConfig.getSheetsService();
 
     public static UpdateValuesResponse updateValues(String spreadsheetId,
             String range,
@@ -24,20 +28,10 @@ public class UpdateValuesValidation {
             List<List<Object>> values)
             throws IOException {
 
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
-                .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
-        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
-
-        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                requestInitializer)
-                .setApplicationName("Sheets samples")
-                .build();
-
         UpdateValuesResponse result = null;
         try {
             ValueRange body = new ValueRange().setValues(values);
-            result = service.spreadsheets().values().update(spreadsheetId, range, body)
+            result = sheetsService.spreadsheets().values().update(spreadsheetId, range, body)
                     .setValueInputOption(valueInputOption)
                     .execute();
             System.out.printf("%d cells updated.", result.getUpdatedCells());
@@ -52,16 +46,8 @@ public class UpdateValuesValidation {
         return result;
     }
 
-    public static void applyDataValidation(String spreadsheetId, String range, List<String> validationList) throws IOException {
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
-                .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
-        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
-
-        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                requestInitializer)
-                .setApplicationName("Sheets samples")
-                .build();
+    public static void applyDataValidation(String spreadsheetId, String range, List<String> validationList)
+            throws IOException {
 
         List<Request> requests = new ArrayList<>();
 
@@ -88,8 +74,7 @@ public class UpdateValuesValidation {
         int endColumn = rangeParts[1].replaceAll("\\d", "").charAt(0) - 'A' + 1;
         int endRow = Integer.parseInt(rangeParts[1].replaceAll("[^\\d]", ""));
 
-
-        int sheetId = getSheetId(service, spreadsheetId, sheetName);
+        int sheetId = getSheetId(spreadsheetId, sheetName);
 
         // Apply the data validation rule to the range
         requests.add(new Request().setSetDataValidation(new SetDataValidationRequest()
@@ -102,11 +87,11 @@ public class UpdateValuesValidation {
                 .setRule(validationRule)));
 
         BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
-        service.spreadsheets().batchUpdate(spreadsheetId, body).execute();
+        sheetsService.spreadsheets().batchUpdate(spreadsheetId, body).execute();
     }
 
-    public static int getSheetId(Sheets service, String spreadsheetId, String sheetName) throws IOException {
-        Spreadsheet spreadsheet = service.spreadsheets().get(spreadsheetId).execute();
+    public static int getSheetId(String spreadsheetId, String sheetName) throws IOException {
+        Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetId).execute();
         for (Sheet sheet : spreadsheet.getSheets()) {
             if (sheet.getProperties().getTitle().equals(sheetName)) {
                 return sheet.getProperties().getSheetId();
@@ -121,7 +106,9 @@ public class UpdateValuesValidation {
         String valueInputOption = "USER_ENTERED";
 
         List<List<Object>> values = new ArrayList<>();
-        values.add(List.of("# invitado", "Apellido", "Nombre", "ESTADO (ESCONDIDA)", "Apodo", "Email", "Celular", "Género", "Idioma", "Idioma (otro)", "Grupo", "Grupo (otro)", "Relac. con homenajeado/a", "Relac. con Usted", "Nota"));
+        values.add(List.of("# invitado", "Apellido", "Nombre", "ESTADO (ESCONDIDA)", "Apodo", "Email", "Celular",
+                "Género", "Idioma", "Idioma (otro)", "Grupo", "Grupo (otro)", "Relac. con homenajeado/a",
+                "Relac. con Usted", "Nota"));
 
         for (int i = 1; i <= 40; i++) {
             List<Object> row = new ArrayList<>();

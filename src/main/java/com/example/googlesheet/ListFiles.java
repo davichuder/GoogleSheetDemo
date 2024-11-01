@@ -1,31 +1,18 @@
 package com.example.googlesheet;
 
+import java.io.IOException;
+
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.services.sheets.v4.SheetsScopes;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 
-import java.io.IOException;
-import java.util.Collections;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class ListFiles {
+    private static final Drive driveService = GoogleConfig.getDriveService();
 
     public static void main(String... args) throws IOException {
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
-                .createScoped(Collections.singleton(DriveScopes.DRIVE));
-        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
-
-        // Create the Drive API client
-        Drive driveService = new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), requestInitializer)
-                .setApplicationName("Drive API Snippet")
-                .build();
-
         // List the files in the Drive
         FileList result = driveService.files().list()
                 .setPageSize(10)

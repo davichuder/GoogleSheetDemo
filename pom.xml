@@ -65,6 +65,11 @@
 			<artifactId>google-api-services-drive</artifactId>
 			<version>v3-rev20241014-2.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>annotationProcessor</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -75,5 +80,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
