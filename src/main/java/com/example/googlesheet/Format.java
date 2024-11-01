@@ -52,50 +52,6 @@ public class Format {
         return result;
     }
 
-    public static void applyDataValidation(String spreadsheetId, String range, List<String> validationList)
-            throws IOException {
-
-        List<Request> requests = new ArrayList<>();
-
-        // Convert validation list to ConditionValue list
-        List<ConditionValue> conditionValues = new ArrayList<>();
-        for (String value : validationList) {
-            conditionValues.add(new ConditionValue().setUserEnteredValue(value));
-        }
-
-        // Define the data validation rule
-        DataValidationRule validationRule = new DataValidationRule()
-                .setCondition(new BooleanCondition()
-                        .setType("ONE_OF_LIST")
-                        .setValues(conditionValues))
-                .setStrict(true)
-                .setShowCustomUi(true);
-
-        String sheetName = range.split("!")[0];
-        String[] rangeParts = range.split("!")[1].split(":");
-
-        int startColumn = rangeParts[0].replaceAll("\\d", "").charAt(0) - 'A';
-        int startRow = Integer.parseInt(rangeParts[0].replaceAll("[^\\d]", "")) - 1;
-
-        int endColumn = rangeParts[1].replaceAll("\\d", "").charAt(0) - 'A' + 1;
-        int endRow = Integer.parseInt(rangeParts[1].replaceAll("[^\\d]", ""));
-
-        int sheetId = getSheetId(spreadsheetId, sheetName);
-
-        // Apply the data validation rule to the range
-        requests.add(new Request().setSetDataValidation(new SetDataValidationRequest()
-                .setRange(new GridRange()
-                        .setSheetId(sheetId)
-                        .setStartRowIndex(startRow)
-                        .setEndRowIndex(endRow)
-                        .setStartColumnIndex(startColumn)
-                        .setEndColumnIndex(endColumn))
-                .setRule(validationRule)));
-
-        BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
-        sheetsService.spreadsheets().batchUpdate(spreadsheetId, body).execute();
-    }
-
     public static int getSheetId(String spreadsheetId, String sheetName) throws IOException {
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetId).execute();
         for (Sheet sheet : spreadsheet.getSheets()) {
@@ -210,13 +166,6 @@ public class Format {
         }
 
         updateValues(spreadsheetId, range, valueInputOption, values);
-
-        // Define the validation list
-        List<String> validationList = List.of("Male", "Female", "Other");
-
-        // Apply data validation
-        String rangeValidation = "Sheet1!H2:H41";
-        applyDataValidation(spreadsheetId, rangeValidation, validationList);
 
         // Apply conditional formatting
         String rangeFormat = "Sheet1!A1:O41";

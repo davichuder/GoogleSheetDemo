@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.api.services.drive.Drive.Comments.Delete;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AddProtectedRangeRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
@@ -21,7 +20,7 @@ public class ProtectColumns {
 
     public static void protectColumn(String spreadsheetId, String sheetName, String column, List<String> editors) throws IOException {
         int sheetId = getSheetId(spreadsheetId, sheetName);
-        int columnIndex = getStartColumnIndex(spreadsheetId, sheetId, column);
+        int columnIndex = getStartColumnIndex(sheetId, column);
         verifyStartColumnIndex(spreadsheetId, sheetId, columnIndex);
 
         removeExistingProtections(spreadsheetId, sheetId, columnIndex);
@@ -53,7 +52,7 @@ public class ProtectColumns {
         throw new IllegalArgumentException("Sheet with name " + sheetName + " not found");
     }
 
-    private static int getStartColumnIndex(String spreadsheetId, int sheetId, String column)
+    private static int getStartColumnIndex(int sheetId, String column)
             throws IOException {
         int result = 0;
         for (int i = 0; i < column.length(); i++) {
@@ -73,8 +72,37 @@ public class ProtectColumns {
     }
 
     private static void removeExistingProtections(String spreadsheetId, int sheetId, int columnIndex) throws IOException {
-        Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetId).setFields("sheets/protectedRanges").execute();
-        // TODO
+        Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetId).execute();
+        List<ProtectedRange> protectedRanges = spreadsheet.getSheets().stream()
+                .filter(sheet -> sheet.getProperties().getSheetId() == sheetId)
+                .findFirst()
+                .map(Sheet::getProtectedRanges)
+                .orElse(new ArrayList<>());
+    
+        List<Request> deleteRequests = new ArrayList<>();
+    
+        for (ProtectedRange protectedRange : protectedRanges) {
+            GridRange range = protectedRange.getRange();
+            if (range != null && 
+                range.getStartColumnIndex() != null && 
+                range.getStartColumnIndex() == columnIndex) {
+                
+                deleteRequests.add(new Request()
+                    .setDeleteProtectedRange(
+                        new DeleteProtectedRangeRequest()
+                            .setProtectedRangeId(protectedRange.getProtectedRangeId())
+                    )
+                );
+            }
+        }
+    
+        if (!deleteRequests.isEmpty()) {
+            BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest()
+                .setRequests(deleteRequests);
+            
+            sheetsService.spreadsheets().batchUpdate(spreadsheetId, body).execute();
+            System.out.println("Removed " + deleteRequests.size() + " existing protections for column " + columnIndex);
+        }
     }
 
     public static void main(String... args) throws IOException {
