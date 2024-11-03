@@ -245,11 +245,11 @@ public class Format {
             values.add(row);
         }
 
-        // updateValues(spreadsheetId, range, valueInputOption, values);
+        updateValues(spreadsheetId, range, valueInputOption, values);
 
         // Apply conditional formatting
         String rangeFormat = "Sheet1!A1:O41";
-        // applyConditionalFormatting(spreadsheetId, rangeFormat);
+        applyConditionalFormatting(spreadsheetId, rangeFormat);
 
         // Adjust column widths
         String rangeWidth = "Sheet1!A1:O41";
