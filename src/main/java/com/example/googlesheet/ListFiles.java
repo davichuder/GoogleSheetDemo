@@ -6,9 +6,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 public class ListFiles {
     private static final Drive driveService = GoogleConfig.getDriveService();
 

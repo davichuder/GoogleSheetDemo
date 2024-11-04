@@ -14,6 +14,7 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.UpdateDimensionPropertiesRequest;
 
 public class ShowHideColumns {
+
     private static final Sheets sheetsService = GoogleConfig.getSheetsService();
 
     public static void hideColumn(String spreadsheetId, String sheetName, String column) throws IOException {
