@@ -20,7 +20,8 @@ public class AddValidationRules {
 
     private static final Sheets sheetsService = GoogleConfig.getSheetsService();
 
-    public static void applyValidationRule(String spreadsheetId, int sheetId, String column, String ruleType) throws IOException {
+    public static void applyValidationRule(String spreadsheetId, int sheetId, String column, String ruleType)
+            throws IOException {
         int startColumnIndex = getStartColumnIndex(column);
         final int firstRow = 1;
 
@@ -48,8 +49,18 @@ public class AddValidationRules {
                                 new ConditionValue().setUserEnteredValue(regex))));
                 break;
 
-            case "NUMBER":
+            case "INTEGER":
                 regex = "=REGEXMATCH(TO_TEXT(" + column + (firstRow + 1) + "); \"^\\d+$\")";
+                rule.setCondition(new BooleanCondition()
+                        .setType("CUSTOM_FORMULA")
+                        .setValues(Collections.singletonList(
+                                new ConditionValue().setUserEnteredValue(regex))));
+                break;
+
+            case "INTEGER_UNIQUE":
+                regex = "=AND(REGEXMATCH(TO_TEXT(" + column + (firstRow + 1)
+                + "); \"^\\d+$\"); COUNTIF(" + column + ":" + column + "; " + column + (firstRow + 1)
+                + ")=1)";
                 rule.setCondition(new BooleanCondition()
                         .setType("CUSTOM_FORMULA")
                         .setValues(Collections.singletonList(
@@ -141,8 +152,9 @@ public class AddValidationRules {
 
         applyValidationRule(spreadsheetId, sheetId, "F", "EMAIL");
         applyValidationRule(spreadsheetId, sheetId, "C", "TEXT");
-        applyValidationRule(spreadsheetId, sheetId, "A", "NUMBER");
-        applyValidationRule(spreadsheetId, sheetId, "A", "DUPLICATE");
+        applyValidationRule(spreadsheetId, sheetId, "B", "INTEGER");
+        applyValidationRule(spreadsheetId, sheetId, "C", "DUPLICATE");
+        applyValidationRule(spreadsheetId, sheetId, "A", "INTEGER_UNIQUE");
 
         List<String> validationList = List.of("Male", "Female", "Other");
         String rangeValidation = "Sheet1!H2:H41";
